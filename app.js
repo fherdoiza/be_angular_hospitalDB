@@ -2,9 +2,22 @@
 
 var express = require("express");
 var mongoose = require("mongoose");
-// Init variables
+var bodyParser = require("body-parser");
 
+
+var appRoutes = require("./routes/app");
+var userRoutes = require("./routes/user");
+var loginRoutes = require("./routes/login");
+// Init variables
 var app = express();
+
+//Body Parser
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
+// parse application/json
+app.use(bodyParser.json());
 
 // Conection to DB
 mongoose.connect("mongodb://localhost:27017/hospitalDB", (err, res) => {
@@ -12,18 +25,14 @@ mongoose.connect("mongodb://localhost:27017/hospitalDB", (err, res) => {
   console.log("Database server running");
 });
 
-//Routes
-app.get("/", (req, res, next) => {
-  res.status(200).json({
-    ok: true,
-    message: "OK"
-  });
-});
+app.use("/login", loginRoutes);
+app.use("/user", userRoutes);
+app.use("/", appRoutes);
 
 // Listen express
-app.listen(3005, () => {
+app.listen(3000, () => {
   console.log(
-    "Express server running on port 3005 \x1b[32m%s\x1b[0m",
+    "Express server running on port 3000 \x1b[32m%s\x1b[0m",
     "online"
   );
 });
