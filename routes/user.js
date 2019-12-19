@@ -54,7 +54,7 @@ app.post("/", middlewareAuth.tokenVerify, (req, res) => {
   });
 });
 
-app.put("/:id", (req, res) => {
+app.put("/:id", middlewareAuth.tokenVerify, (req, res) => {
   var id = req.params.id;
   var body = req.body;
 
@@ -95,7 +95,7 @@ app.put("/:id", (req, res) => {
   });
 });
 
-app.delete("/:id", (req, res) => {
+app.delete("/:id", middlewareAuth.tokenVerify, (req, res) => {
   var id = req.params.id;
   var body = req.body;
 
