@@ -12,7 +12,7 @@ app.get("/:type/:img", (req, res, next) => {
   var type = req.params.type;
   var img = req.params.img;
 
-  var imagePath = path.resolve(__dirname, `../uploads/${tipo}/${img}`);
+  var imagePath = path.resolve(__dirname, `../uploads/${type}/${img}`);
   if(fs.existsSync(imagePath)){
     res.sendFile(imagePath);
   }else{
