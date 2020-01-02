@@ -1,12 +1,9 @@
 var express = require("express");
-var bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-
 var middlewareAuth = require('../middlewares/auth');
 
 var app = express();
 
-var User = require("../models/user");
+var Hospital = require("../models/hospital");
 
 //Routes
 app.get("/", (req, res, next) => {
@@ -14,23 +11,24 @@ app.get("/", (req, res, next) => {
   var skip = req.query.skip || 0;
   skip = Number(skip);
 
-  User.find({}, "nombre email img role")
+  Hospital.find({})
   .skip(skip) // a partir de qué registro muestra (desde)
   .limit(5) // limite del número de registros que se quiere
-  .exec((err, users) => {
+  .populate('user', 'nombre, email') //muestra del objeto user las propiedades nombre y email.
+  .exec((err, hospitals) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        message: "Error al cargar los usuarios",
+        message: "Error al cargar los hospitales",
         error: err
       });
     } else {
-      User.count({}, (err, count)=>{
+      Hospital.count({}, (err, count)=>{
         return res.status(200).json({
           ok: true,
-          message: "Get de user",
-          data: users,
-          total: count
+          message: "Get de hospital",
+          data: hospitals,
+          total:count
         });
       });
       
@@ -40,26 +38,23 @@ app.get("/", (req, res, next) => {
 
 app.post("/", middlewareAuth.tokenVerify, (req, res) => {
   var body = req.body;
-  var user = new User({
-    nombre: body.nombre,
-    email: body.email,
-    password: bcrypt.hashSync(body.password, 10),
-    img: body.img,
-    role: body.role
+  var hospital = new Hospital({
+    name: body.nombre,
+    user: req.user._id
   });
 
-  user.save((err, newUser) => {
+  hospital.save((err, newHospital) => {
     if (err) {
       return res.status(400).json({
         ok: false,
-        message: "Error al crear el usuario",
+        message: "Error al crear el hospital",
         error: err
       });
     } else {
       return res.status(201).json({
         ok: true,
-        message: "Post de user",
-        data: newUser
+        message: "Post de hospital",
+        data: newHospital
       });
     }
   });
@@ -69,37 +64,36 @@ app.put("/:id", middlewareAuth.tokenVerify, (req, res) => {
   var id = req.params.id;
   var body = req.body;
 
-  User.findById(id, (err, user) => {
+  Hospital.findById(id, (err, hospital) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        message: "Error al buscar el usuario",
+        message: "Error al buscar el hospital",
         error: err
       });
     }
-    if (!user) {
+    if (!hospital) {
       return res.status(400).json({
         ok: false,
-        message: "El usuario con ese id no existe"
+        message: "El hospital con ese id no existe"
       });
     }
 
-    user.nombre = body.nombre;
-    user.email = body.email;
-    user.role = body.role;
+    hospital.name = body.nombre;
+    hospital.user = req.user._id;
 
-    user.save((err, updatedUser) => {
+    hospital.save((err, updatedHospital) => {
       if (err) {
         return res.status(400).json({
           ok: false,
-          message: "Error al actualizar el usuario",
+          message: "Error al actualizar el hospital",
           error: err
         });
       } else {
         return res.status(200).json({
           ok: true,
-          message: "Put de user",
-          data: updatedUser
+          message: "Put del hospital",
+          data: updatedHospital
         });
       }
     });
@@ -110,34 +104,34 @@ app.delete("/:id", middlewareAuth.tokenVerify, (req, res) => {
   var id = req.params.id;
   var body = req.body;
 
-  User.findById(id, (err, user) => {
+  Hospital.findById(id, (err, hospital) => {
     if (err) {
       return res.status(500).json({
         ok: false,
-        message: "Error al buscar el usuario",
+        message: "Error al buscar el hospital",
         error: err
       });
     }
-    if (!user) {
+    if (!hospital) {
       return res.status(400).json({
         ok: false,
-        message: "El usuario con ese id no existe"
+        message: "El hospital con ese id no existe"
       });
     }
   });
 
-  User.findByIdAndDelete(id, (err, deletedUser) => {
+  Hospital.findByIdAndDelete(id, (err, deletedHospital) => {
     if (err) {
       return res.status(400).json({
         ok: false,
-        message: "Error al borrar el usuario",
+        message: "Error al borrar el hospital",
         error: err
       });
     } else {
       return res.status(200).json({
         ok: true,
-        message: "DELETE de user",
-        data: deletedUser
+        message: "DELETE de hospital",
+        data: deletedHospital
       });
     }
   });
