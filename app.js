@@ -41,9 +41,9 @@ app.use("/img", imagesRoutes);
 app.use("/", appRoutes);
 
 // Listen express
-app.listen(3001, () => {
+app.listen(3000, () => {
   console.log(
-    "Express server running on port 3001 \x1b[32m%s\x1b[0m",
+    "Express server running on port 3000 \x1b[32m%s\x1b[0m",
     "online"
   );
 });
