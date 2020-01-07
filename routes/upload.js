@@ -13,7 +13,7 @@ var Hospital = require('../models/hospital');
 app.use(fileUpload());
 
 //Routes
-app.put('/:type/:id', function(req, res) {
+app.put('/:type/:id', function (req, res) {
 
 
   var type = req.params.type;
@@ -21,7 +21,7 @@ app.put('/:type/:id', function(req, res) {
 
   var validImageTypes = ['hospitals', 'doctors', 'users'];
 
-  if(validImageTypes.indexOf(type)<0){
+  if (validImageTypes.indexOf(type) < 0) {
     return res.status(400).json({
       ok: false,
       message: 'Ruta con categoría de imagen no válida',
@@ -40,13 +40,13 @@ app.put('/:type/:id', function(req, res) {
   // The name of the input field (i.e. "imageFile") is used to retrieve the uploaded file
   let imageFile = req.files.imageFile;
   var nameArray = imageFile.name.split('.');
-  var extension = nameArray[nameArray.length-1];
+  var extension = nameArray[nameArray.length - 1];
 
   // solo estas extensiones se permiten
 
   var validExtensions = ['png', 'jpg', 'gif', 'jpeg'];
 
-  if(validExtensions.indexOf(extension)<0){
+  if (validExtensions.indexOf(extension) < 0) {
     return res.status(400).json({
       ok: false,
       message: 'Extensión no válida',
@@ -60,7 +60,7 @@ app.put('/:type/:id', function(req, res) {
 
   // Use the mv() method to place the file somewhere on your server
   imageFile.mv(path, err => {
-    if (err){
+    if (err) {
       return res.status(500).json({
         ok: false,
         message: 'Error al mover el archivo',
@@ -69,35 +69,37 @@ app.put('/:type/:id', function(req, res) {
     }
 
     saveFile(type, id, fileName, res);
-      
-    
+
+
   });
 });
 
-function saveFile(type, id, fileName, res){
+function saveFile(type, id, fileName, res) {
 
 
-  if(type === 'users'){
-    User.findById(id, (err, user)=>{
+  if (type === 'users') {
+    User.findById(id, (err, user) => {
 
-      if(!user){
+      if (!user) {
         res.status(400).json({
           ok: false,
           message: 'no existe el usuario'
         });
       }
 
-      var oldPath = './uploads/users/'+user.img;
-
+      var oldPath = './uploads/users/' + user.img;
       // si existe, elimina la imagen anterior
-      if(fs.existsSync(oldPath)){
-        fs.unlink(oldPath);
+      if (fs.existsSync(oldPath)) {
+        fs.unlink(oldPath, (err) => {
+          if (err) throw err;
+          console.log('successfully deleted', oldPath);
+        });
       }
 
       user.img = fileName;
-      user.save((err, updatedUser)=>{
+      user.save((err, updatedUser) => {
         updatedUser.password = 'Oculta :D';
-        if(err){
+        if (err) {
           return res.status(400).json({
             ok: false,
             message: err
@@ -111,10 +113,10 @@ function saveFile(type, id, fileName, res){
       });
     });
   }
-  if(type === 'doctors'){
-    Doctor.findById(id, (err, doctor)=>{
+  if (type === 'doctors') {
+    Doctor.findById(id, (err, doctor) => {
 
-      if(!doctor){
+      if (!doctor) {
         res.status(400).json({
           ok: false,
           message: 'no existe el doctor'
@@ -123,13 +125,13 @@ function saveFile(type, id, fileName, res){
       var oldPath = './uploads/doctors/' + doctor.img;
 
       // si existe, elimina la imagen anterior
-      if(fs.existsSync(oldPath)){
+      if (fs.existsSync(oldPath)) {
         fs.unlink(oldPath);
       }
 
       doctor.img = fileName;
-      doctor.save((err, updatedDoctor)=>{
-        if(err){
+      doctor.save((err, updatedDoctor) => {
+        if (err) {
           return res.status(400).json({
             ok: false,
             message: err
@@ -143,10 +145,10 @@ function saveFile(type, id, fileName, res){
       });
     });
   }
-  if(type === 'hospitals'){
-    Hospital.findById(id, (err, hospital)=>{
+  if (type === 'hospitals') {
+    Hospital.findById(id, (err, hospital) => {
 
-      if(!hospital){
+      if (!hospital) {
         res.status(400).json({
           ok: false,
           message: 'no existe el hospital'
@@ -156,13 +158,13 @@ function saveFile(type, id, fileName, res){
       var oldPath = './uploads/hospitals/' + hospital.img;
 
       // si existe, elimina la imagen anterior
-      if(fs.existsSync(oldPath)){
+      if (fs.existsSync(oldPath)) {
         fs.unlink(oldPath);
       }
 
       hospital.img = fileName;
-      hospital.save((err, updatedHospital)=>{
-        if(err){
+      hospital.save((err, updatedHospital) => {
+        if (err) {
           return res.status(400).json({
             ok: false,
             message: err

@@ -16,6 +16,15 @@ var imagesRoutes = require("./routes/images");
 // Init variables
 var app = express();
 
+// habilitar los CORS
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+  next();
+});
+
+
 //Body Parser
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -35,7 +44,7 @@ app.use("/user", userRoutes);
 app.use("/hospital", hospitalRoutes);
 app.use("/doctor", doctorRoutes);
 app.use("/search", searchRoutes);
-app.use("/upload", uploadRoutes);
+app.use("/uploads", uploadRoutes);
 app.use("/img", imagesRoutes);
 
 app.use("/", appRoutes);

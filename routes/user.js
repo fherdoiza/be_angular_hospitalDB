@@ -38,7 +38,7 @@ app.get("/", (req, res, next) => {
   });
 });
 
-app.post("/", middlewareAuth.tokenVerify, (req, res) => {
+app.post("/", (req, res) => {
   var body = req.body;
   var user = new User({
     nombre: body.nombre,

@@ -10,7 +10,9 @@ var SEED = require('../config/config').SEED;
 
 //google
 var CLIENT_ID = require('../config/config').CLIENT_ID;
-const {OAuth2Client} = require('google-auth-library');
+const {
+  OAuth2Client
+} = require('google-auth-library');
 const client = new OAuth2Client(CLIENT_ID);
 
 
@@ -46,7 +48,7 @@ app.post("/", (req, res) => {
         });
       }
       // TODO crear token
-      usuarioDB.password = "";
+      userDB.password = "";
       var token = jwt.sign({
         user: userDB
       }, SEED, {
@@ -58,7 +60,7 @@ app.post("/", (req, res) => {
         message: "Login correcto",
         data: {
           token,
-          user: usuarioDB
+          user: userDB
         }
       });
     }
@@ -68,8 +70,8 @@ app.post("/", (req, res) => {
 //Google Auth
 async function verify(token) {
   const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+    idToken: token,
+    audience: CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
   });
   const payload = ticket.getPayload();
   const userid = payload['sub'];
@@ -83,20 +85,21 @@ async function verify(token) {
     google: true
   }
 }
-verify().catch(console.error);
 
 app.post('/google', async (req, res) => {
   var token = req.body.token;
   var googleUser = await verify(token)
-                          .catch(error=>{
-                            return res.status(400).json({
-                              ok:false,
-                              message:'token no válido'
-                            })
-                          });
+    .catch(error => {
+      return res.status(400).json({
+        ok: false,
+        message: 'token no válido'
+      })
+    });
 
 
-  User.findOne({email:googleUser.email}, (err, userDB)=>{
+  User.findOne({
+    email: googleUser.email
+  }, (err, userDB) => {
     if (err) {
       return res.status(500).json({
         ok: false,
@@ -105,18 +108,18 @@ app.post('/google', async (req, res) => {
       });
     }
     if (userDB) {
-      if(userDB.google===false){
+      if (userDB.google === false) {
         return res.status(400).json({
           ok: false,
           message: "No se puede autenticar con google ya que está registrado con contraseña"
         });
-      }else{
+      } else {
         var token = jwt.sign({
           user: userDB
         }, SEED, {
           expiresIn: 14400
         });
-  
+
         res.status(200).json({
           ok: true,
           message: "Login correcto",
@@ -126,7 +129,7 @@ app.post('/google', async (req, res) => {
           }
         });
       }
-    }else{
+    } else {
       // El usuario no existe y hay que crearlo
       var userG = new User();
       userG.nombre = googleUser.nombre;
@@ -136,17 +139,27 @@ app.post('/google', async (req, res) => {
       userG.password = 'NA';
 
       var token = jwt.sign({
-        user: userDB
+        user: userG
       }, SEED, {
         expiresIn: 14400
       });
 
-      res.status(200).json({
-        ok: true,
-        message: "Login correcto",
-        data: {
-          token,
-          user: userDB
+      userG.save((err, newUser) => {
+        if (err) {
+          return res.status(400).json({
+            ok: false,
+            message: "Error al crear el usuario de google",
+            error: err
+          });
+        } else {
+          return res.status(200).json({
+            ok: true,
+            message: "Login correcto",
+            data: {
+              token,
+              user: newUser
+            }
+          });
         }
       });
     }
