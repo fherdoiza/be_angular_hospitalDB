@@ -126,7 +126,10 @@ function saveFile(type, id, fileName, res) {
 
       // si existe, elimina la imagen anterior
       if (fs.existsSync(oldPath)) {
-        fs.unlink(oldPath);
+        fs.unlink(oldPath, (err) => {
+          if (err) throw err;
+          console.log('successfully deleted', oldPath);
+        });
       }
 
       doctor.img = fileName;
@@ -159,7 +162,10 @@ function saveFile(type, id, fileName, res) {
 
       // si existe, elimina la imagen anterior
       if (fs.existsSync(oldPath)) {
-        fs.unlink(oldPath);
+        fs.unlink(oldPath, (err) => {
+          if (err) throw err;
+          console.log('successfully deleted', oldPath);
+        });
       }
 
       hospital.img = fileName;

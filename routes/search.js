@@ -18,7 +18,7 @@ app.get("/todo/:query", (req, res, next) => {
       searchDoctors(query, regex),
       searchUsers(query, regex)
     ]
-  ).then(resp=>{
+  ).then(resp => {
     res.status(200).json({
       ok: true,
       message: "OK",
@@ -29,56 +29,66 @@ app.get("/todo/:query", (req, res, next) => {
   });
 });
 
-function searchHospitals(query, regex){
+function searchHospitals(query, regex) {
 
-  return new Promise((resolve, reject)=>{
-    Hospital.find({nombre: regex})
-    .populate('user', 'nombre email')
-    .exec((err, hospitals)=>{
-      if(err){
-        reject();
-      }else{
-        resolve(hospitals);
-      }
-    });
+  return new Promise((resolve, reject) => {
+    Hospital.find({
+        name: regex
+      })
+      .populate('user', 'nombre email img')
+      .exec((err, hospitals) => {
+        if (err) {
+          reject();
+        } else {
+          resolve(hospitals);
+        }
+      });
   });
-  
-}
-function searchDoctors(query, regex){
 
-  return new Promise((resolve, reject)=>{
-    Doctor.find({nombre: regex})
-    .populate('user', 'nombre email')
-    .populate('hospital')
-    .exec((err, doctors)=>{
-      if(err){
-        reject();
-      }else{
-        resolve(doctors);
-      }
-    });
-  });
-  
-}
-function searchUsers(query, regex){
-
-  return new Promise((resolve, reject)=>{
-    User.find({}, 'nombre email role')
-    .or([ // para buscar sobre múltiples campos
-      {'nombre':regex},
-      {'email':regex},
-    ]).exec((err, users)=>{
-      if(err){
-        reject();
-      }else{
-        resolve(users);
-      }
-    });
-  });
-  
 }
 
-app.get('/colection/:table/:query', (req, res, next) => {
+function searchDoctors(query, regex) {
+
+  return new Promise((resolve, reject) => {
+    Doctor.find({
+        name: regex
+      })
+      .populate('user', 'nombre email img')
+      .populate('hospital')
+      .exec((err, doctors) => {
+        if (err) {
+          reject();
+        } else {
+          resolve(doctors);
+        }
+      });
+  });
+
+}
+
+function searchUsers(query, regex) {
+
+  return new Promise((resolve, reject) => {
+    User.find({}, 'nombre email role img')
+      .or([ // para buscar sobre múltiples campos
+        {
+          'nombre': regex
+        },
+        {
+          'email': regex
+        },
+      ]).exec((err, users) => {
+        if (err) {
+          reject();
+        } else {
+          resolve(users);
+        }
+      });
+  });
+
+}
+
+app.get('/collection/:table/:query', (req, res, next) => {
 
   var table = req.params.table;
   var query = req.params.query;
@@ -86,7 +96,7 @@ app.get('/colection/:table/:query', (req, res, next) => {
 
   var promise;
 
-  switch(table){
+  switch (table) {
     case 'users':
       promise = searchUsers(query, regex);
       break;
@@ -98,16 +108,16 @@ app.get('/colection/:table/:query', (req, res, next) => {
       break;
     default:
       return res.status(400).json({
-          ok: false,
-          message: 'no coincide la ruta para la búsqueda'
-        });
+        ok: false,
+        message: 'no coincide la ruta para la búsqueda'
+      });
   }
 
-  promise.then(resp=>{
+  promise.then(resp => {
 
     res.status(200).json({
-      ok:true,
-      [table] : resp
+      ok: true,
+      [table]: resp
     });
   });
 

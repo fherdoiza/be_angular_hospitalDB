@@ -12,28 +12,55 @@ app.get("/", (req, res, next) => {
   skip = Number(skip);
 
   Hospital.find({})
-  .skip(skip) // a partir de qué registro muestra (desde)
-  .limit(5) // limite del número de registros que se quiere
-  .populate('user', 'nombre, email') //muestra del objeto user las propiedades nombre y email.
-  .exec((err, hospitals) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        message: "Error al cargar los hospitales",
-        error: err
-      });
-    } else {
-      Hospital.count({}, (err, count)=>{
-        return res.status(200).json({
-          ok: true,
-          message: "Get de hospital",
-          data: hospitals,
-          total:count
+    .skip(skip) // a partir de qué registro muestra (desde)
+    .limit(5) // limite del número de registros que se quiere
+    .populate('user', 'nombre, email') //muestra del objeto user las propiedades nombre y email.
+    .exec((err, hospitals) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          message: "Error al cargar los hospitales",
+          error: err
         });
+      } else {
+        Hospital.count({}, (err, count) => {
+          return res.status(200).json({
+            ok: true,
+            message: "Get de hospital",
+            data: hospitals,
+            total: count
+          });
+        });
+
+      }
+    });
+});
+app.get('/:id', (req, res) => {
+  var id = req.params.id;
+  Hospital.findById(id)
+    .populate('usuario', 'nombre img email')
+    .exec((err, hospital) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          mensaje: 'Error al buscar hospital',
+          errors: err
+        });
+      }
+      if (!hospital) {
+        return res.status(400).json({
+          ok: false,
+          mensaje: 'El hospital con el id ' + id + 'no existe',
+          errors: {
+            message: 'No existe un hospital con ese ID'
+          }
+        });
+      }
+      res.status(200).json({
+        ok: true,
+        hospital: hospital
       });
-      
-    }
-  });
+    })
 });
 
 app.post("/", middlewareAuth.tokenVerify, (req, res) => {
@@ -79,7 +106,7 @@ app.put("/:id", middlewareAuth.tokenVerify, (req, res) => {
       });
     }
 
-    hospital.name = body.nombre;
+    hospital.name = body.name;
     hospital.user = req.user._id;
 
     hospital.save((err, updatedHospital) => {

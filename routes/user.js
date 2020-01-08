@@ -14,28 +14,28 @@ app.get("/", (req, res, next) => {
   var skip = req.query.skip || 0;
   skip = Number(skip);
 
-  User.find({}, "nombre email img role")
-  .skip(skip) // a partir de qué registro muestra (desde)
-  .limit(5) // limite del número de registros que se quiere
-  .exec((err, users) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        message: "Error al cargar los usuarios",
-        error: err
-      });
-    } else {
-      User.count({}, (err, count)=>{
-        return res.status(200).json({
-          ok: true,
-          message: "Get de user",
-          data: users,
-          total: count
+  User.find({}, "nombre email img role google")
+    .skip(skip) // a partir de qué registro muestra (desde)
+    .limit(5) // limite del número de registros que se quiere
+    .exec((err, users) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          message: "Error al cargar los usuarios",
+          error: err
         });
-      });
-      
-    }
-  });
+      } else {
+        User.count({}, (err, count) => {
+          return res.status(200).json({
+            ok: true,
+            message: "Get de user",
+            data: users,
+            total: count
+          });
+        });
+
+      }
+    });
 });
 
 app.post("/", (req, res) => {
